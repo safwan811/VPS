@@ -121,7 +121,7 @@ yes | ufw enable
 # User Status
 cd
 curl --user Kiellez:Terbaek811 -L -O https://bitbucket.org/Kiellez/vps/downloads/users
-chmod +x status
+chmod +x users
 
 # About
 clear
