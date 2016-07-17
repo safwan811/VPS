@@ -3,100 +3,87 @@
 # go to root
 cd
 
-# disable se linux
-echo 0 > /selinux/enforce
-sed -i 's/SELINUX=enforcing/SELINUX=disable/g'  /etc/sysconfig/selinux
-
-# set locale
-sed -i 's/AcceptEnv/#AcceptEnv/g' /etc/ssh/sshd_config
-service sshd restart
-
 # disable ipv6
 echo 1 > /proc/sys/net/ipv6/conf/all/disable_ipv6
 sed -i '$ i\echo 1 > /proc/sys/net/ipv6/conf/all/disable_ipv6' /etc/rc.local
-sed -i '$ i\echo 1 > /proc/sys/net/ipv6/conf/all/disable_ipv6' /etc/rc.d/rc.local
 
 # install wget and curl
-yum -y install wget curl
+apt-get update
+apt-get -y install wget curl
 
-# setting repo
-wget http://dl.fedoraproject.org/pub/epel/6/i386/epel-release-6-8.noarch.rpm
-wget http://rpms.famillecollet.com/enterprise/remi-release-6.rpm
-rpm -Uvh epel-release-6-8.noarch.rpm
-rpm -Uvh remi-release-6.rpm
+# Change to Time GMT+8
+ln -fs /usr/share/zoneinfo/Asia/Kuala_Lumpur /etc/localtime
+
+# set locale
+sed -i 's/AcceptEnv/#AcceptEnv/g' /etc/ssh/sshd_config
+service ssh restart
 
 # remove unused
-yum -y remove sendmail;
-yum -y remove httpd;
-yum -y remove cyrus-sasl
+apt-get -y --purge remove samba*;
+apt-get -y --purge remove apache2*;
+apt-get -y --purge remove sendmail*;
+apt-get -y --purge remove bind9*;
 
 # update
-yum -y update
+apt-get update 
+apt-get -y upgrade
 
 # install webserver
-yum -y install nginx php-fpm php-cli
-service nginx restart
-service php-fpm restart
-chkconfig nginx on
-chkconfig php-fpm on
+apt-get -y install nginx php5-fpm php5-cli
 
 # install essential package
-yum -y install openvpn vnstat git nano
-yum -y groupinstall 'Development Tools'
-yum -y install cmake
+apt-get -y install nmap nano iptables sysv-rc-conf openvpn vnstat apt-file
+apt-get -y install build-essential
 
+# disable exim
+service exim4 stop
+sysv-rc-conf exim4 off
 
-# exim off
-service exim stop
-chkconfig exim off
+# update apt-file
+apt-file update
 
-# setting vnstat
+# Setting Vnstat
 vnstat -u -i eth0
-echo "MAILTO=root" > /etc/cron.d/vnstat
-echo "*/5 * * * * root /usr/sbin/vnstat.cron" >> /etc/cron.d/vnstat
+chown -R vnstat:vnstat /var/lib/vnstat
 service vnstat restart
-chkconfig vnstat on
 
 # install screenfetch
 cd
 wget https://github.com/KittyKatt/screenFetch/raw/master/screenfetch-dev
 mv screenfetch-dev /usr/bin/screenfetch
 chmod +x /usr/bin/screenfetch
-echo "clear" >> .bash_profile
-echo "screenfetch" >> .bash_profile
+echo "clear" >> .profile
+echo "screenfetch" >> .profile
 
-# install webserver
+# Install Web Server
 cd
+rm /etc/nginx/sites-enabled/default
+rm /etc/nginx/sites-available/default
 wget -O /etc/nginx/nginx.conf "https://raw.githubusercontent.com/muchigo/VPS/master/conf/nginx.conf"
-sed -i 's/www-data/nginx/g' /etc/nginx/nginx.conf
 mkdir -p /home/vps/public_html
 echo "<pre>Setup by Kiellez</pre>" > /home/vps/public_html/index.html
 echo "<?php phpinfo(); ?>" > /home/vps/public_html/info.php
-rm /etc/nginx/conf.d/*
 wget -O /etc/nginx/conf.d/vps.conf "https://raw.githubusercontent.com/muchigo/VPS/master/conf/vps.conf"
-sed -i 's/apache/nginx/g' /etc/php-fpm.d/www.conf
-chmod -R +rx /home/vps
-service php-fpm restart
+sed -i 's/listen = \/var\/run\/php5-fpm.sock/listen = 127.0.0.1:9000/g' /etc/php5/fpm/pool.d/www.conf
+service php5-fpm restart
 service nginx restart
 
 # install openvpn
 wget -O /etc/openvpn/openvpn.tar "https://raw.githubusercontent.com/muchigo/VPS/master/conf/openvpn.tar"
 cd /etc/openvpn/
 tar xf openvpn.tar
-wget -O /etc/openvpn/1194.conf "https://raw.githubusercontent.com/muchigo/VPS/master/conf/1194-centos.conf"
+wget -O /etc/openvpn/1194.conf "https://raw.githubusercontent.com/muchigo/VPS/master/conf/1194-debian.conf"
+service openvpn restart
+sysctl -w net.ipv4.ip_forward=1
+sed -i 's/#net.ipv4.ip_forward=1/net.ipv4.ip_forward=1/g' /etc/sysctl.conf
 wget -O /etc/iptables.up.rules "https://raw.githubusercontent.com/muchigo/VPS/master/conf/iptables.up.rules"
 sed -i '$ i\iptables-restore < /etc/iptables.up.rules' /etc/rc.local
-sed -i '$ i\iptables-restore < /etc/iptables.up.rules' /etc/rc.d/rc.local
 MYIP=`curl -s ifconfig.me`;
 MYIP2="s/xxxxxxxxx/$MYIP/g";
 sed -i $MYIP2 /etc/iptables.up.rules;
-sed -i 's/venet0/eth0/g' /etc/iptables.up.rules
 iptables-restore < /etc/iptables.up.rules
-sysctl -w net.ipv4.ip_forward=1
-sed -i 's/net.ipv4.ip_forward = 0/net.ipv4.ip_forward = 1/g' /etc/sysctl.conf
 service openvpn restart
-chkconfig openvpn on
-cd
+
 
 # configure openvpn client config
 cd /etc/openvpn/
@@ -110,23 +97,22 @@ cd
 # install badvpn
 wget -O /usr/bin/badvpn-udpgw "https://github.com/muchigo/VPS/raw/master/conf/badvpn-udpgw64"
 sed -i '$ i\screen -AmdS badvpn badvpn-udpgw --listen-addr 127.0.0.1:7300' /etc/rc.local
-sed -i '$ i\screen -AmdS badvpn badvpn-udpgw --listen-addr 127.0.0.1:7300' /etc/rc.d/rc.local
 chmod +x /usr/bin/badvpn-udpgw
 screen -AmdS badvpn badvpn-udpgw --listen-addr 127.0.0.1:7300
 
-
 # setting port ssh
 sed -i '/Port 22/a Port 143' /etc/ssh/sshd_config
-sed -i 's/#Port 22/Port  22/g' /etc/ssh/sshd_config
-service sshd restart
-chkconfig sshd on
+sed -i 's/Port 22/Port  22/g' /etc/ssh/sshd_config
+service ssh restart
 
 # install dropbear
-yum -y install dropbear
-echo "OPTIONS=\"-p 109 -p 110 -p 443\"" > /etc/sysconfig/dropbear
+apt-get -y install dropbear
+sed -i 's/NO_START=1/NO_START=0/g' /etc/default/dropbear
+sed -i 's/DROPBEAR_PORT=22/DROPBEAR_PORT=443/g' /etc/default/dropbear
+sed -i 's/DROPBEAR_EXTRA_ARGS=/DROPBEAR_EXTRA_ARGS="-p 109 -p 110"/g' /etc/default/dropbear
 echo "/bin/false" >> /etc/shells
+service ssh restart
 service dropbear restart
-chkconfig dropbear on
 
 # install vnstat gui
 cd /home/vps/public_html/
@@ -135,7 +121,8 @@ tar xf vnstat_php_frontend-1.5.1.tar.gz
 rm vnstat_php_frontend-1.5.1.tar.gz
 mv vnstat_php_frontend-1.5.1 vnstat
 cd vnstat
-sed -i "s/\$iface_list = array('eth0', 'sixxs');/\$iface_list = array('eth0');/g" config.php
+sed -i 's/eth0/venet0/g' config.php
+sed -i "s/\$iface_list = array('venet0', 'sixxs');/\$iface_list = array('venet0');/g" config.php
 sed -i "s/\$language = 'nl';/\$language = 'en';/g" config.php
 sed -i 's/Internal/Internet/g' config.php
 sed -i '/SixXS IPv6/d' config.php
@@ -143,52 +130,41 @@ sed -i "s/\$locale = 'en_US.UTF-8';/\$locale = 'en_US.UTF+8';/g" config.php
 cd
 
 # install fail2ban
-yum -y install fail2ban
+apt-get -y install fail2ban;
 service fail2ban restart
-chkconfig fail2ban on
 
-# install squid
-yum -y install squid
-wget -O /etc/squid/squid.conf "https://raw.githubusercontent.com/muchigo/VPS/master/conf/squid.conf"
-sed -i $MYIP2 /etc/squid/squid.conf;
-service squid restart
-chkconfig squid on
+# install squid3
+apt-get -y install squid3
+wget -O /etc/squid3/squid.conf "https://raw.githubusercontent.com/muchigo/VPS/master/conf/squid.conf"
+sed -i $MYIP2 /etc/squid3/squid.conf;
+service squid3 restart
 
 # install webmin
 cd
-yum -y install perl-Net-SSLeay
-wget http://prdownloads.sourceforge.net/webadmin/webmin-1.801-1.noarch.rpm
-rpm -i webmin-1.801-1.noarch.rpm;
-rm webmin-1.801-1.noarch.rpm
-sed -i 's/ssl=1/ssl=0/g' /etc/webmin/miniserv.conf
+apt-get -y install perl-Net-SSLeay
+wget "http://prdownloads.sourceforge.net/webadmin/webmin_1.801_all.deb"
+dpkg --install webmin_1.801_all.deb;
+apt-get -y -f install;
+rm /root/webmin_1.801_all.deb
 service webmin restart
-chkconfig webmin on
+service vnstat restart
 
 # User Status
 cd
 wget https://raw.githubusercontent.com/muchigo/VPS/master/conf/status
 chmod +x status
 
-# cron
-service crond start
-chkconfig crond on
-
-# set time GMT +8
-ln -fs /usr/share/zoneinfo/Asia/Kuala_Lumpur /etc/localtime
-
-# Restart Servuce
-chown -R nginx:nginx /home/vps/public_html
+# Restart Service
+chown -R www-data:www-data /home/vps/public_html
 service nginx start
 service php-fpm start
 service vnstat restart
 service openvpn restart
-service sshd restart
+service ssh restart
 service dropbear restart
 service fail2ban restart
-service squid restart
+service squid3 restart
 service webmin restart
-service crond start
-chkconfig crond on
 
 # info
 clear
@@ -210,4 +186,3 @@ echo ""
 echo "Please Reboot your VPS !"
 echo ""
 echo "==============================================="
-
