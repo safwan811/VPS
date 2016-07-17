@@ -12,7 +12,7 @@ echo "deb http://repo.pritunl.com/stable/apt trusty main" > /etc/apt/sources.lis
 apt-key adv --keyserver hkp://keyserver.ubuntu.com --recv 7F0CEB10
 apt-key adv --keyserver hkp://keyserver.ubuntu.com --recv CF8E292A
 apt-get update
-apt-get upgrade
+apt-get -y upgrade
 apt-get -y install pritunl mongodb-org
 service pritunl start
 
