@@ -169,14 +169,10 @@ cd
 wget https://raw.githubusercontent.com/muchigo/VPS/master/conf/status
 chmod +x status
 
-# cron
-service crond start
-chkconfig crond on
-
 # set time GMT +8
 ln -fs /usr/share/zoneinfo/Asia/Kuala_Lumpur /etc/localtime
 
-# Restart Servuce
+# Restart Service
 chown -R nginx:nginx /home/vps/public_html
 service nginx start
 service php-fpm start
