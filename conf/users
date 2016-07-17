@@ -11,7 +11,7 @@ do
         ID="$(echo $mumetndase | grep -v nobody | cut -d: -f3)"
         exp="$(chage -l $AKUN | grep "Account expires" | awk -F": " '{print $2}')"
         online="$(cat /etc/openvpn/log.log | grep -Eom 1 $AKUN | grep -Eom 1 $AKUN)"
-        if [[ $ID -ge 500 ]]; then
+        if [[ $ID -ge 1001 ]]; then
         if [[ -z $online ]]; then
         printf "%-4s %-15s %-10s %-3s\n" "$C." "$AKUN" "OFFLINE" "$exp"
         OFF=$((OFF+1))
