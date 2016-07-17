@@ -33,6 +33,7 @@ apt-get -y install nginx php5-fpm php5-cli
 
 # install essential package
 apt-get -y install nmap nano iptables sysv-rc-conf openvpn vnstat apt-file
+apt-get -y install libexpat1-dev libxml-parser-perl
 apt-get -y install build-essential
 
 # disable exim
@@ -141,7 +142,6 @@ service squid3 restart
 
 # install webmin
 cd
-apt-get -y install perl-Net-SSLeay
 wget "http://prdownloads.sourceforge.net/webadmin/webmin_1.801_all.deb"
 dpkg --install webmin_1.801_all.deb;
 apt-get -y -f install;
