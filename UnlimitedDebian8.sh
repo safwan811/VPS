@@ -7,8 +7,8 @@ cd
 ln -fs /usr/share/zoneinfo/Asia/Kuala_Lumpur /etc/localtime
 
 # Install Pritunl
-echo "deb http://repo.mongodb.org/apt/ubuntu trusty/mongodb-org/3.0 multiverse" > /etc/apt/sources.list.d/mongodb-org-3.0.list
-echo "deb http://repo.pritunl.com/stable/apt trusty main" > /etc/apt/sources.list.d/pritunl.list
+echo "deb http://repo.mongodb.org/apt/debian wheezy/mongodb-org/3.0 main" > /etc/apt/sources.list.d/mongodb-org-3.0.list
+echo "deb http://repo.pritunl.com/stable/apt jessie main" > /etc/apt/sources.list.d/pritunl.list
 apt-key adv --keyserver hkp://keyserver.ubuntu.com --recv 7F0CEB10
 apt-key adv --keyserver hkp://keyserver.ubuntu.com --recv CF8E292A
 apt-get update
@@ -25,6 +25,7 @@ sed -i s/xxxxxxxxx/$MYIP/g /etc/squid3/squid.conf;
 service squid3 restart
 
 # Enable Firewall
+apt-get -y install ufw
 sudo ufw allow 22,80,81,222,443,8080,9700,60000/tcp
 sudo ufw allow 22,80,81,222,443,8080,9700,60000/udp
 sudo yes | ufw enable
@@ -73,7 +74,7 @@ echo "-Vnstat"
 echo "Jika ada tambahan sila tambah sendiri ye =)"
 echo "Sila login ke pritunl untuk proceed step seterusnya"
 echo " "
-echo "Disediakan Oleh Muchigo"
+echo "Disediakan Oleh Kiellez"
 echo "TimeZone   :  Malaysia"
 echo "Vnstat     :  http://$MYIP:81/vnstat"
 echo "Pritunl    :  https://$MYIP"
