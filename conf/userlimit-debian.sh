@@ -1,7 +1,5 @@
 #!/bin/bash
-# Credit: om mikodemos
-# Saya edit dikit meskipun saya
-# ga paham bash programming hehehe
+
 PARAM=$1
 echo -n > /tmp/pid2
 ps ax|grep dropbear > /tmp/pid
