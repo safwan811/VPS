@@ -160,7 +160,6 @@ cd
 wget https://raw.githubusercontent.com/muchigo/VPS/master/Autokick-debian.sh
 bash Autokick-debian.sh
 
-
 # Restart Service
 chown -R www-data:www-data /home/vps/public_html
 service nginx start
