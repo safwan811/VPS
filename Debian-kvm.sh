@@ -85,7 +85,6 @@ sed -i $MYIP2 /etc/iptables.up.rules;
 iptables-restore < /etc/iptables.up.rules
 service openvpn restart
 
-
 # configure openvpn client config
 cd /etc/openvpn/
 wget -O /etc/openvpn/1194-client.ovpn "https://raw.githubusercontent.com/muchigo/VPS/master/conf/1194-client.conf"
@@ -94,12 +93,6 @@ PASS=`cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 15 | head -n 1`;
 tar cf client.tar 1194-client.ovpn
 cp client.tar /home/vps/public_html/
 cd
-
-# install badvpn
-wget -O /usr/bin/badvpn-udpgw "https://github.com/muchigo/VPS/raw/master/conf/badvpn-udpgw64"
-sed -i '$ i\screen -AmdS badvpn badvpn-udpgw --listen-addr 127.0.0.1:7300' /etc/rc.local
-chmod +x /usr/bin/badvpn-udpgw
-screen -AmdS badvpn badvpn-udpgw --listen-addr 127.0.0.1:7300
 
 # setting port ssh
 sed -i '/Port 22/a Port 143' /etc/ssh/sshd_config
@@ -154,6 +147,14 @@ cd
 wget https://raw.githubusercontent.com/muchigo/VPS/master/conf/status
 chmod +x status
 
+# Install Dos Deflate
+apt-get -y install dnsutils dsniff
+wget https://github.com/jgmdev/ddos-deflate/archive/master.zip
+unzip master.zip
+cd ddos-deflate-master
+./install.sh
+cd
+
 # Restart Service
 chown -R www-data:www-data /home/vps/public_html
 service nginx start
@@ -173,7 +174,6 @@ echo "OpenVPN  : TCP 1194 (client config : http://$MYIP:81/client.tar)"
 echo "OpenSSH  : 22, 143"
 echo "Dropbear : 109, 110, 443"
 echo "Squid3   : 8080 (limit to IP SSH)"
-echo "badvpn   : badvpn-udpgw port 7300"
 echo ""
 echo "----------"
 echo "Webmin   : http://$MYIP:10000/"
