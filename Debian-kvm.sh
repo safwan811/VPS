@@ -93,8 +93,10 @@ wget -O /etc/openvpn/1194-client.ovpn "https://raw.githubusercontent.com/muchigo
 sed -i $MYIP2 /etc/openvpn/1194-client.ovpn;
 sed -i 's/proto tcp/proto udp/g' /etc/openvpn/1194-client.ovpn
 sed -i 's/1194/6500/g' /etc/openvpn/1194-client.ovpn
+NAME=`uname -n`.`awk '/^domain/ {print $2}' /etc/resolv.conf`;
+mv /etc/openvpn/1194-client.ovpn /etc/openvpn/$NAME.ovpn
 PASS=`cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 15 | head -n 1`;
-tar cf client.tar 1194-client.ovpn
+tar cf client.tar $NAME.ovpn
 cp client.tar /home/vps/public_html/
 cd
 
