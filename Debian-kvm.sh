@@ -167,6 +167,12 @@ cd
 wget https://raw.githubusercontent.com/muchigo/VPS/master/Autokick-debian.sh
 bash Autokick-debian.sh
 
+# Install Menu for OpenVPN
+cd
+wget https://raw.githubusercontent.com/muchigo/VPS/master/conf/menu
+mv ./menu /usr/local/bin/menu
+chmod +x /usr/local/bin/menu
+
 # Restart Service
 chown -R www-data:www-data /home/vps/public_html
 service nginx start
