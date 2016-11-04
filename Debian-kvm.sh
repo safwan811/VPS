@@ -82,7 +82,6 @@ sed -i '$ i\iptables-restore < /etc/iptables.up.rules' /etc/rc.local
 MYIP=`ifconfig | grep -Eo 'inet (addr:)?([0-9]*\.){3}[0-9]*' | grep -Eo '([0-9]*\.){3}[0-9]*' | grep -v '127.0.0' | grep -v '192.168'`;
 MYIP2="s/xxxxxxxxx/$MYIP/g";
 sed -i 's/port 1194/port 6500/g' /etc/openvpn/1194.conf
-sed -i 's/proto tcp/proto udp/g' /etc/openvpn/1194.conf
 sed -i $MYIP2 /etc/iptables.up.rules;
 iptables-restore < /etc/iptables.up.rules
 service openvpn restart
@@ -91,7 +90,6 @@ service openvpn restart
 cd /etc/openvpn/
 wget -O /etc/openvpn/1194-client.ovpn "https://raw.githubusercontent.com/muchigo/VPS/master/conf/1194-client.conf"
 sed -i $MYIP2 /etc/openvpn/1194-client.ovpn;
-sed -i 's/proto tcp/proto udp/g' /etc/openvpn/1194-client.ovpn
 sed -i 's/1194/6500/g' /etc/openvpn/1194-client.ovpn
 NAME=`uname -n`.`awk '/^domain/ {print $2}' /etc/resolv.conf`;
 mv /etc/openvpn/1194-client.ovpn /etc/openvpn/$NAME.ovpn
@@ -191,7 +189,7 @@ echo "Setup by Kiellez"
 echo "OpenVPN  : TCP 1194 (client config : http://$MYIP:81/client.tar)"
 echo "OpenSSH  : 22, 143"
 echo "Dropbear : 109, 110, 443"
-echo "Squid3   : 8080 (limit to IP SSH)"
+echo "Squid3   : 8080, 60000"
 echo ""
 echo "----------"
 echo "Webmin   : http://$MYIP:10000/"
